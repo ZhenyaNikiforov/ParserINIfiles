@@ -38,6 +38,8 @@ public:
     regex patternTypeLine("[\\s\\S]+=[\\s\\S]*");                  // шаблон строки, содержащей знак "="
     vector<vector<string>> treeSets = {};                          // дерево наборов
     regex patternOurVariable(variableName + "\\s*=\\s*[\\s\\S]*"); // шаблон строки с искомой переменной
+    regex patternErrorLine("[\\s\\S]+=\\s*");                      // шаблон ошибки строки
+    int lineCount = 1;                                             // подсчёт строк
 
     while (true) // парсим файл
     {
@@ -50,6 +52,11 @@ public:
       getline(iniFile, lineFromFile);                        // читаем строку из файла
       this->cleansUpSpacesInBeginningAndInEnd(lineFromFile); // пробелы в начале и конце
 
+      if (regex_match(lineFromFile, patternErrorLine))
+      {
+        throw invalid_argument("ERROR! At line " + to_string(lineCount) + ": " + lineFromFile);
+      };
+
       if (regex_match(lineFromFile, patternSectionName)) // если имя секции
       {
         treeSets.push_back({lineFromFile});
@@ -59,6 +66,7 @@ public:
       {
         treeSets[treeSets.size() - 1].push_back(lineFromFile);
       };
+      lineCount++;
     };
 
     string endResult = ""; // строка окончательного результата
@@ -137,5 +145,16 @@ int main()
     cout << e.what() << endl; // ошибка непрочитанного файла
   }
 
+  cout << endl;
+  ini_parser parser3("./configErr.ini");
+
+  try
+  {
+    cout << parser3.getValue("[Section2].var2") << endl;
+  }
+  catch (const invalid_argument &e)
+  {
+    cout << e.what() << endl; //
+  }
   return 0;
 }
