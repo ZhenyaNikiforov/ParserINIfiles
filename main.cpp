@@ -20,9 +20,10 @@ public:
     ifstream iniFile(this->pathToFile); // открываем ini-файл
     if (iniFile.is_open() == false)     // если не открылся...
     {
-      cout << "File \"" << this->pathToFile << "\" unknow." << endl; //...сообщаем об этом
-      iniFile.close();                                               // закрываем файл,
-      return "error";                                                // прерываем подпрограмму
+      // cout << "File \"" << this->pathToFile << "\" unknow." << endl; //...сообщаем об этом
+      iniFile.close(); // закрываем файл,
+      throw invalid_argument("ERROR! File \"" + this->pathToFile + "\" ne najden.");
+      return "error"; // прерываем подпрограмму
     };
 
     string sectionName = "";  // название секции
@@ -90,7 +91,10 @@ public:
         }
       }
     }
-
+    if (endResult == "")
+    {
+      throw invalid_argument("ERROR! Peremennaya \"" + variableName + "\" ne najdena v \"" + sectionName + "\"");
+    }
     return endResult; // прерываем подпрограмму
   };
 
@@ -107,10 +111,31 @@ private:
 
 int main()
 {
+  cout << endl;
   ini_parser parser("./config.ini");
-  string value = parser.getValue("[Section2].var10");
 
-  cout << "znachenie: " << value << endl;
+  try
+  {
+    cout << parser.getValue("[Section1].var1") << endl;
+    cout << parser.getValue("[Section1].var2") << endl;
+    cout << parser.getValue("[Section1].var10") << endl;
+  }
+  catch (const invalid_argument &e)
+  {
+    cout << e.what() << endl; // ошибка ненайденной переменной
+  }
+
+  cout << endl;
+  ini_parser parser2("./configg.ini");
+
+  try
+  {
+    cout << parser2.getValue("[Section1].var1") << endl;
+  }
+  catch (const invalid_argument &e)
+  {
+    cout << e.what() << endl; // ошибка непрочитанного файла
+  }
 
   return 0;
 }
