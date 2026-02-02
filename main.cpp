@@ -15,14 +15,14 @@ public:
     this->pathToFile = fileName; // заносим имя и путь к файлу в поле экземпляра;
   };
 
-  void getValue(string adressLine) // подпрограмма взятия значения переменной
+  string getValue(string adressLine) // подпрограмма взятия значения переменной
   {
     ifstream iniFile(this->pathToFile); // открываем ini-файл
     if (iniFile.is_open() == false)     // если не открылся...
     {
       cout << "File \"" << this->pathToFile << "\" unknow." << endl; //...сообщаем об этом
       iniFile.close();                                               // закрываем файл,
-      return;                                                        // прерываем подпрограмму
+      return "error";                                                // прерываем подпрограмму
     };
 
     string sectionName = "";  // название секции
@@ -49,62 +49,32 @@ public:
       getline(iniFile, lineFromFile);                        // читаем строку из файла
       this->cleansUpSpacesInBeginningAndInEnd(lineFromFile); // пробелы в начале и конце
 
-      cout << lineFromFile << endl; // выводим на экран
-
-      if (regex_match(lineFromFile, patternSectionName)) //
+      if (regex_match(lineFromFile, patternSectionName)) // если имя секции
       {
-        treeSets.push_back({lineFromFile}); //
+        treeSets.push_back({lineFromFile});
       };
 
-      if (regex_match(lineFromFile, patternTypeLine)) //
+      if (regex_match(lineFromFile, patternTypeLine)) // если тип строки
       {
-        treeSets[treeSets.size() - 1].push_back(lineFromFile); //
-      };
-      //-Это только для отладки
-      if (regex_match(lineFromFile, patternOurVariable))
-      {
-        cout << "EST` VAR1!!!" << endl;
+        treeSets[treeSets.size() - 1].push_back(lineFromFile);
       };
     };
 
-    cout << endl;
-    cout << "Pokazyivayem strukturu grafa:" << endl;
-    cout << endl;
-
-    for (int Set = 0; Set < treeSets.size(); ++Set)
-    {
-      for (int Line = 0; Line < treeSets[Set].size(); Line++)
-      {
-        cout << treeSets[Set][Line] << endl;
-      };
-      cout << endl;
-    };
-
-    cout << "Perebiraem derevo spiskov:" << endl;
-    cout << endl;
     string endResult = ""; // строка окончательного результата
 
     for (int Set = 0; Set < treeSets.size(); Set++)
     {
       if (treeSets[Set][0] == sectionName)
       {
-        cout << "Sekciya, kotoryu myi ishem: ";
-        cout << treeSets[Set][0] << endl;
         for (int Line = 1; Line < treeSets[Set].size(); Line++)
         {
           if (regex_match(treeSets[Set][Line], patternOurVariable))
           {
-            cout << "Stroka, kotoruy myi ishem: ";
-            cout << treeSets[Set][Line] << endl;
-
-            char paritySignum = '=';                                                // знак "равно"
-            size_t positionParitySignum = treeSets[Set][Line].find(paritySignum);   // место знака "равно"
+            size_t positionParitySignum = treeSets[Set][Line].find('=');            // место знака "равно"
             string mezoLine = treeSets[Set][Line].substr(positionParitySignum + 1); // строка после знака "равно"
-            cout << "stroka posle znaka = :" << mezoLine << endl;
 
-            char commentSignum = ';'; // символ комментария
             string finishedLine = "";
-            size_t positionCommentSignum = mezoLine.find(commentSignum); // место комментария                                                                // финишн. строка
+            size_t positionCommentSignum = mezoLine.find(';'); // место комментария                                                                // финишн. строка
             if (positionCommentSignum != string::npos)
             {
               finishedLine = mezoLine.substr(0, positionCommentSignum);
@@ -113,10 +83,7 @@ public:
             {
               finishedLine = mezoLine;
             };
-            cout << "finishnaya stroka :" << finishedLine << endl;
             cleansUpSpacesInBeginningAndInEnd(finishedLine);
-            cout << "finish. str. bez probelov :" << finishedLine << endl;
-
             endResult.clear();
             endResult = finishedLine;
           }
@@ -124,9 +91,7 @@ public:
       }
     }
 
-    cout << "Konechnyij rezultat f-csii :" << endResult << endl;
-
-    return; // прерываем подпрограмму
+    return endResult; // прерываем подпрограмму
   };
 
   void cleansUpSpacesInBeginningAndInEnd(string &line)
@@ -143,9 +108,9 @@ private:
 int main()
 {
   ini_parser parser("./config.ini");
-  parser.getValue("[Section1].var1");
-  /*int value = parser.get_value("[Section2].var1");//<int>
+  string value = parser.getValue("[Section2].var10");
 
-  cout << "znachenie: " << value << endl;*/
+  cout << "znachenie: " << value << endl;
+
   return 0;
 }
