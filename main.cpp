@@ -25,34 +25,12 @@ public:
       return;                                                        // прерываем подпрограмму
     };
 
-    cout << endl;
-    cout << "Otkr.!, (fajl otkryilsya!)" << endl; // потом убрать! Не забыть!
+    string sectionName = "";  // название секции
+    string variableName = ""; // название переменной
 
-    string sectionName = "";                    // название секции
-    string variableName = "";                   // название переменной
-    bool pointTerminator = false;               // точки нет пока
-    for (int i = 0; i < adressLine.size(); ++i) // парсим строку адреса
-    {
-      if ((pointTerminator == false) && (adressLine[i] != '.'))
-      {
-        sectionName.push_back(adressLine[i]);
-        continue;
-      };
-      if ((pointTerminator == false) && (adressLine[i] == '.'))
-      {
-        pointTerminator = true;
-        continue;
-      };
-      if ((pointTerminator == true) && (adressLine[i] != '.'))
-      {
-        variableName.push_back(adressLine[i]);
-        continue;
-      }
-    };
-
-    cout << "Nazvanie sekcii: " << sectionName << endl;  // потом убрать
-    cout << "Imya peremennoj: " << variableName << endl; // тоже
-    cout << endl;
+    size_t positionPointSeparator = adressLine.find('.');         // номер точки в строке
+    sectionName = adressLine.substr(0, positionPointSeparator);   // имя секции - первая часть
+    variableName = adressLine.substr(positionPointSeparator + 1); // имя переменной - вторая часть
 
     string lineFromFile = "";                                      // текущая строка из файла
     regex patternSectionName("\\[[a-zA-Z0-9_]+\\]");               // шаблон имени секции
@@ -165,7 +143,7 @@ private:
 int main()
 {
   ini_parser parser("./config.ini");
-  parser.getValue("[Section3].Mode");
+  parser.getValue("[Section1].var1");
   /*int value = parser.get_value("[Section2].var1");//<int>
 
   cout << "znachenie: " << value << endl;*/
